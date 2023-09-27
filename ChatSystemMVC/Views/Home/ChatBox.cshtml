@@ -1,0 +1,9 @@
+﻿<h2>Messages</h2>
+@{
+    var names = new List<string> { "Ram", "Hari", "Ramu" };
+}
+
+@foreach (var name in names)
+{
+    <a asp-area="" asp-controller="Home" asp-action="GetMessage" asp-route-name="@name">@name</a>
+}

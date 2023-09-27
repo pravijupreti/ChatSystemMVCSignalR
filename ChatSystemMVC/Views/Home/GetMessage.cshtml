@@ -1,0 +1,217 @@
+﻿@using Microsoft.AspNetCore.Mvc.Rendering
+@using Newtonsoft.Json;
+@model MessageViewModel
+
+<style>
+    /* Chat room styles */
+    .chat-container {
+        max-width: 800px;
+        margin: 0 auto;
+        background-color: #f5f5f5;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .message-container {
+        margin-bottom: 20px;
+        overflow: auto;
+    }
+
+    .input-container {
+        display: flex;
+        align-items: center;
+        margin-top: 20px;
+    }
+
+        .input-container input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .input-container button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+    
+    .message {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 10px;
+    }
+    
+    .message-content {
+        word-wrap: break-word;
+    }
+    
+    .sender1-message .message-content {
+        background-color: #007bff;
+        color: #ffffff;
+        border-radius: 10px;
+        padding: 10px;
+        max-width: 70%;
+        align-self: flex-start;
+    }
+    
+    .sender2-message .message-content {
+        background-color: #e9ecef;
+        color: #333333;
+        border-radius: 10px;
+        padding: 10px;
+        max-width: 70%;
+        align-self: flex-end;
+    }
+</style>
+
+<div class="chat-container">
+    <div id="initialOldMessages">
+        <div class="row" id="messageContainer" >
+            @foreach(var user in Model.MessageDto.Select(x=>x.SenderId).Distinct())
+            {
+            <div class="col-md-6">
+                @foreach (var message in Model.MessageDto.Where(x => x.SenderId == Model.CurrentUserId))
+                {
+                    <div class="message sender1-message">
+                        <div class="message-content">@message.Content
+                                <input class="chat-msg-date" type="hidden" value="@message.DateTime" />
+                            </div>
+                           
+                    </div>
+                }
+            </div>
+            <div class="col-md-6">
+                    @foreach (var message in Model.MessageDto.Where(x => x.SenderId == Model.SecondUserID))
+                {
+                    <div class="message sender2-message">
+                        <div class="message-content">@message.Content
+                                <input class="chat-msg-date" type="hidden" value="@message.DateTime" />
+                        </div>
+                       
+                    </div>
+                }
+            </div>
+            }
+        </div>
+    </div>
+    @*<div id="messageContainer"></div>*@
+    <form id="sendMessageForm" action="/Home/SendMessage" method="post">
+        <div class="input-container">
+            <input type="text" name="Content" placeholder="Type your message..." />
+            <input type="hidden" name="Id" id="Id" value="@Model.MessageDto.FirstOrDefault()?.Id" />
+            <input type="hidden" name="SenderId" id="SenderId" value="@Model.MessageDto.FirstOrDefault()?.SenderId" />
+            <input type="hidden" name="To" id="To" value="@Model.MessageDto.FirstOrDefault()?.To" />
+            <button type="submit">Send</button>
+        </div>
+        
+    </form>
+</div>
+
+@section scripts {
+    <!-- Include jQuery library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script src="~/js/signalr/signalr.min.js"></script>
+    <script>
+        function displayMessage(message) {
+            var messageContainer = $("#messageContainer");
+            var hasNewMessages = false; // Flag to check if there are new messages
+            debugger
+            message.forEach((m) => {
+                var messageContent = m.content;
+                var messageDateTime = m.dateTime;
+                debugger
+
+                // Check if the message is already present in the messageContainer
+                var existingMessage = messageContainer.find(`div.message-content:contains('${messageContent}')`);
+                if (existingMessage.length === 0) {
+                    hasNewMessages = true; // Set the flag to true if there are new messages
+                    var newMessageHtml =
+                        `<div class="message sender2-message">
+                  <div class="message-content">${messageContent}</div>
+                  <input class="chat-msg-date" type="hidden" value="${messageDateTime}" />
+                </div>`;
+                    messageContainer.append(newMessageHtml);
+                } 
+                else
+                {
+                    existingMessage.children('.chat-msg-date').filter(function () {
+                        return $(this).val() === messageDateTime;
+                    });
+
+                    if (matchingDateTimeInput.length === 0) {
+                        hasNewMessages = true; // Set the flag to true if there are new messages
+                        var newDateTimeInput = `<input class="chat-msg-date" type="hidden" value="${messageDateTime}" />`;
+                        existingMessage.closest('.message').append(newDateTimeInput);
+                        var newMessageHtml =
+                            `<div class="message sender2-message">
+                          <div class="message-content">${messageContent}</div>
+                          <input class="chat-msg-date" type="hidden" value="${messageDateTime}" />
+                        </div>`;
+                        messageContainer.append(newMessageHtml);
+                    }
+                }
+            });
+
+            // Show a message if there are no new messages
+            // if (!hasNewMessages) {
+            //   messageContainer.append("<div>No new messages</div>");
+            // }
+        }
+
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var connection = new signalR.HubConnectionBuilder()
+                .withUrl("https://localhost:7249/myhub2", {
+                    skipNegotiation: true,
+                    transport: signalR.HttpTransportType.WebSockets
+                })
+                .withAutomaticReconnect()
+                .configureLogging(signalR.LogLevel.Debug)
+                .build();
+
+            connection.on("ReceiveMessages", (e) => displayMessage(e));
+
+            function start() {
+                try {
+                    connection.start()
+                        .then(() => {
+                            console.log("SignalR Connected.");
+
+                            // Subscribe to the custom group here
+                            var userIds = @Html.Raw(JsonConvert.SerializeObject(new[] { Model.CurrentUserId, Model.SecondUserID}));
+                            var customGroupName = '@Model.ConnectionRoom';
+                            connection.invoke("ConnectToChat", userIds, customGroupName)
+                                .then(() => {
+                                    console.log(`Subscribed to ${customGroupName}`);
+                                })
+                                .catch((err) => {
+                                    console.log(`Error subscribing to ${customGroupName}: ${err}`);
+                                });
+                        })
+                        .catch((err) => {
+                            console.log(err);
+                            setTimeout(start, 5000);
+                        });
+                } catch (err) {
+                    console.log(err);
+                    setTimeout(start, 5000);
+                }
+            };
+
+            connection.onclose(async () => {
+                start();
+            });
+
+            start();
+        })
+
+    </script>
+}
