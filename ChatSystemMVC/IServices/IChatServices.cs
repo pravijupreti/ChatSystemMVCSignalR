@@ -1,4 +1,4 @@
-﻿namespace ChatSystemMVC
+﻿namespace ChatSystemMVC.IServices
 {
     public interface IChatServices
     {

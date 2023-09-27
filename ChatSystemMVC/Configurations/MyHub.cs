@@ -1,8 +1,7 @@
-﻿
-using ChatSystemMVC.Controllers;
+﻿using ChatSystemMVC.Controllers;
 using Microsoft.AspNetCore.SignalR;
 
-namespace ChatSystemMVC
+namespace ChatSystemMVC.Configurations
 {
     public class MyHub : Hub
     {

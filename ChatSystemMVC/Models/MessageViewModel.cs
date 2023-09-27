@@ -1,4 +1,4 @@
-﻿namespace ChatSystemMVC
+﻿namespace ChatSystemMVC.Models
 {
     public class MessageViewModel
     {

@@ -1,11 +1,11 @@
-using ChatSystemMVC;
+using ChatSystemMVC.Configurations;
+using ChatSystemMVC.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddTransient<IChatServices, ChatServices>();
-builder.Services.AddSignalR();
+builder.Services.AddInfrastructureServices(builder.Configuration);
 
 var app = builder.Build();
 

@@ -7,7 +7,7 @@ using System.Data.SqlClient;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace ChatSystemMVC
+namespace ChatSystemMVC.Services
 {
     public class ChatServices : IChatServices
     {
@@ -79,9 +79,9 @@ namespace ChatSystemMVC
             }
 
             var specificUserMessages = MessagesList.Where(x =>
-            (userIds.Contains(x.SenderId) && userIds.Contains(x.To)) ||
-            (userIds.Contains(x.To) && userIds.Contains(x.SenderId)))
-            .ToList().DistinctBy(x=>x.DateTime);
+            userIds.Contains(x.SenderId) && userIds.Contains(x.To) ||
+            userIds.Contains(x.To) && userIds.Contains(x.SenderId))
+            .ToList().DistinctBy(x => x.DateTime);
 
             return specificUserMessages;
         }
@@ -102,8 +102,8 @@ namespace ChatSystemMVC
             }
 
             var specificUserMessages = MessagesList.Where(x =>
-            (userIds.Contains(x.SenderId) && userIds.Contains(x.To)) ||
-            (userIds.Contains(x.To) && userIds.Contains(x.SenderId)))
+            userIds.Contains(x.SenderId) && userIds.Contains(x.To) ||
+            userIds.Contains(x.To) && userIds.Contains(x.SenderId))
             .ToList().DistinctBy(x => x.Content);
 
             return specificUserMessages;
