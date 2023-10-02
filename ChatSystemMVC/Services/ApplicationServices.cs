@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using ChatSystemMVC.ApplicationDBcontext;
+using ChatSystemMVC.IServices;
+using Microsoft.EntityFrameworkCore;
 
 namespace ChatSystemMVC.Services
 {
@@ -12,6 +14,7 @@ namespace ChatSystemMVC.Services
 
             #region DI
             services.AddTransient<IChatServices, ChatServices>();
+            services.AddTransient<IUserRepository, UserRepository>();
             services.AddSignalR();
             #endregion
             return services;

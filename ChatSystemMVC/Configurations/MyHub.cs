@@ -1,4 +1,5 @@
 ﻿using ChatSystemMVC.Controllers;
+using ChatSystemMVC.IServices;
 using Microsoft.AspNetCore.SignalR;
 
 namespace ChatSystemMVC.Configurations

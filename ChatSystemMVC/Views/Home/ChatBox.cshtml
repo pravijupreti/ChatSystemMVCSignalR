@@ -1,9 +1,40 @@
 ﻿<h2>Messages</h2>
-@{
-    var names = new List<string> { "Ram", "Hari", "Ramu" };
+@model ChatBoxDto
+
+@foreach (var name in Model.FriendsNameList)
+{
+    <div>
+        <a class="messageLink" data-name="@name" href="#">@name</a>
+        <input type="hidden" name="currentUserName" value="@Model.CurrentUserName" />
+    </div>
 }
 
-@foreach (var name in names)
-{
-    <a asp-area="" asp-controller="Home" asp-action="GetMessage" asp-route-name="@name">@name</a>
+@section scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha384-vtXRMe3mGCbOeY7l30aIg8H9p3GdeSe4IFlP6G8JMa7o7lXvnz3GFKzPxzJdPfGK" crossorigin="anonymous"></script>
+
+    <script>
+        $(document).ready(function () {
+            $(".messageLink").click(function (event) {
+                event.preventDefault(); // Prevent the default behavior of the link
+                var name = $(this).data("name");
+                var currentUserName = '@Model.CurrentUserName';
+                var form = $("<form>").attr({
+                    method: "GET",
+                    action: '@Url.Action("GetMessage", "Home")'
+                });
+                $("<input>").attr({
+                    type: "hidden",
+                    name: "name",
+                    value: name
+                }).appendTo(form);
+                $("<input>").attr({
+                    type: "hidden",
+                    name: "currentUserName",
+                    value: currentUserName
+                }).appendTo(form);
+                form.appendTo("body").submit(); // Submit the form
+            });
+        });
+    </script>
 }
+
