@@ -3,6 +3,7 @@ using ChatSystemMVC.Models;
 using Firebase.Database;
 using Firebase.Database.Query;
 using FirebaseAdmin;
+using FirebaseAdmin.Auth;
 using FirebaseAdmin.Messaging;
 using Google.Apis.Auth.OAuth2;
 using System.Data.SqlClient;
@@ -17,7 +18,7 @@ namespace ChatSystemMVC.Services
         {
             if (FirebaseApp.DefaultInstance == default)
             {
-                var credential = GoogleCredential.FromFile("E:\\ChatSystemMVC\\ChatSystemMVC\\Firebase_Admin_sdk.json");
+                var credential = GoogleCredential.FromFile("C:\\Users\\kamal\\Desktop\\ChatSystemMVC\\ChatSystemMVC\\Firebase_Admin_sdk.json");
                 var firebaseApp = FirebaseApp.Create(new AppOptions
                 {
                     Credential = credential
@@ -55,6 +56,14 @@ namespace ChatSystemMVC.Services
         {
             // Retrieve chat messages from Firebase Realtime Database
             // Example code:
+            ListUsersOptions listUsersOptions = new ListUsersOptions();
+            listUsersOptions.PageToken = null;
+            listUsersOptions.PageSize = 20;
+            
+            var user1 = FirebaseAuth.DefaultInstance.ListUsersAsync(listUsersOptions);
+            var userlist = user1.ReadPageAsync(20);
+            var userName = userlist.Result.Select(x => x.Uid);
+            
             var firebaseClient = new FirebaseClient("https://fir-auth-5f97e-default-rtdb.asia-southeast1.firebasedatabase.app");
             var MessagesList = new List<MessageDto>();
             foreach (var user in userIds)
@@ -90,6 +99,7 @@ namespace ChatSystemMVC.Services
 
         public async Task<IEnumerable<MessageDto>> GetLatestChatMessage(List<string> userIds)
         {
+            var firebaseusers = FirebaseAuth.DefaultInstance.ListUsersAsync(null);
             // Retrieve chat messages from Firebase Realtime Database
             // Example code:
             var firebaseClient = new FirebaseClient("https://fir-auth-5f97e-default-rtdb.asia-southeast1.firebasedatabase.app");
