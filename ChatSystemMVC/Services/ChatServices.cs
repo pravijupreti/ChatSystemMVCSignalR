@@ -6,7 +6,9 @@ using FirebaseAdmin;
 using FirebaseAdmin.Auth;
 using FirebaseAdmin.Messaging;
 using Google.Apis.Auth.OAuth2;
+using Newtonsoft.Json;
 using System.Data.SqlClient;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -14,17 +16,56 @@ namespace ChatSystemMVC.Services
 {
     public class ChatServices : IChatServices
     {
-        public ChatServices()
+        //public ChatServices()
+        //{
+        //    if (FirebaseApp.DefaultInstance == default)
+        //    {
+        //        var credential = GoogleCredential.FromFile("C:\\Users\\kamal\\Desktop\\ChatSystemMVC\\ChatSystemMVC\\Firebase_Admin_sdk.json");
+        //        var firebaseApp = FirebaseApp.Create(new AppOptions
+        //        {
+        //            Credential = credential
+        //        });
+        //    }
+        //}
+
+
+        public static void InitializeFirebase()
         {
-            if (FirebaseApp.DefaultInstance == default)
+            if (FirebaseApp.DefaultInstance == null)
             {
-                var credential = GoogleCredential.FromFile("C:\\Users\\kamal\\Desktop\\ChatSystemMVC\\ChatSystemMVC\\Firebase_Admin_sdk.json");
-                var firebaseApp = FirebaseApp.Create(new AppOptions
+                var json = CreateServiceAccountJson();
+                var googleCredential = GoogleCredential.FromJson(json);
+
+                var appOptions = new AppOptions()
                 {
-                    Credential = credential
-                });
+                    Credential = googleCredential
+                };
+
+                FirebaseApp.Create(appOptions);
             }
         }
+
+        private static string CreateServiceAccountJson()
+        {
+            var serviceAccountConfig = new
+            {
+                type = FirebaseAdminSDK.Type,
+                project_id = FirebaseAdminSDK.ProjectId,
+                private_key_id = FirebaseAdminSDK.PrivateKeyId,
+                private_key = FirebaseAdminSDK.PrivateKey,
+                client_email = FirebaseAdminSDK.ClientEmail,
+                client_id = FirebaseAdminSDK.ClientId,
+                auth_uri = FirebaseAdminSDK.AuthUri,
+                token_uri = FirebaseAdminSDK.TokenUri,
+                auth_provider_x509_cert_url = FirebaseAdminSDK.AuthProviderX509CertUrl,
+                client_x509_cert_url = FirebaseAdminSDK.ClientX509CertUrl,
+                universe_domain = FirebaseAdminSDK.UniverseDomain
+            };
+
+            return JsonConvert.SerializeObject(serviceAccountConfig, Formatting.Indented);
+        }
+
+
         public async Task SendMessage(MessageDto messageDto)
         {
             // Store the message in Firebase Realtime Database

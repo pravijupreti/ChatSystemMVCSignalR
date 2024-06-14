@@ -2,7 +2,7 @@ using ChatSystemMVC.Configurations;
 using ChatSystemMVC.Services;
 
 var builder = WebApplication.CreateBuilder(args);
-
+ChatServices.InitializeFirebase();
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddInfrastructureServices(builder.Configuration);
